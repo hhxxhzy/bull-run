@@ -1,0 +1,271 @@
+{
+	"name": "bull-run",
+	"displayName": "牛来 · Bull Run — 编辑器盯盘",
+	"description": "Realtime stock quotes in VSCode sidebar & status bar. A-shares, indexes, HK & US stocks. Red-up/Green-down (China convention).",
+	"version": "0.7.5",
+	"publisher": "buddy",
+	"license": "MIT",
+	"engines": {
+		"vscode": "^1.85.0"
+	},
+	"categories": [
+		"Other"
+	],
+	"activationEvents": [],
+	"main": "./out/extension.js",
+	"contributes": {
+		"viewsContainers": {
+			"activitybar": [
+				{
+					"id": "stock-watch",
+					"title": "Stock Watch",
+					"icon": "media/container.svg"
+				}
+			]
+		},
+		"views": {
+			"stock-watch": [
+				{
+					"type": "tree",
+					"id": "stockWatchTreeView",
+					"name": "自选股",
+					"dragAndDrop": true
+				}
+			]
+		},
+		"commands": [
+			{
+				"command": "stockWatch.addStock",
+				"title": "添加自选股",
+				"icon": "$(add)"
+			},
+			{
+				"command": "stockWatch.removeStock",
+				"title": "从自选中移除",
+				"icon": "$(close)"
+			},
+			{
+				"command": "stockWatch.refresh",
+				"title": "刷新行情",
+				"icon": "$(refresh)"
+			},
+			{
+				"command": "stockWatch.openDetail",
+				"title": "在浏览器打开行情详情",
+				"icon": "$(link-external)"
+			},
+			{
+				"command": "stockWatch.showDetailPanel",
+				"title": "查看详情（股价 · 分时 · 五档 · 逐笔）",
+				"icon": "$(graph)"
+			},
+			{
+				"command": "stockWatch.pinToStatusBar",
+				"title": "添加到状态栏",
+				"icon": "$(pin)"
+			},
+			{
+				"command": "stockWatch.unpinFromStatusBar",
+				"title": "从状态栏移除",
+				"icon": "$(pin-off)"
+			},
+			{
+				"command": "stockWatch.showPanel",
+				"title": "打开自选股面板",
+				"icon": "$(list-unordered)"
+			},
+			{
+				"command": "stockWatch.toggleBossMode",
+				"title": "老板模式（一键隐藏/恢复行情）",
+				"icon": "$(eye-closed)"
+			},
+			{
+				"command": "stockWatch.toggleSort",
+				"title": "切换排序（涨跌幅/代码/名称/添加顺序）",
+				"icon": "$(arrow-swap)"
+			},
+			{
+				"command": "stockWatch.openSettings",
+				"title": "打开设置",
+				"icon": "$(settings-gear)"
+			}
+		],
+		"menus": {
+			"view/title": [
+				{
+					"command": "stockWatch.addStock",
+					"when": "view == stockWatchTreeView",
+					"group": "navigation@1"
+				},
+				{
+					"command": "stockWatch.refresh",
+					"when": "view == stockWatchTreeView",
+					"group": "navigation@2"
+				},
+				{
+					"command": "stockWatch.toggleSort",
+					"when": "view == stockWatchTreeView",
+					"group": "navigation@3"
+				},
+				{
+					"command": "stockWatch.toggleBossMode",
+					"when": "view == stockWatchTreeView && !stockWatch.bossMode",
+					"group": "navigation@4"
+				},
+				{
+					"command": "stockWatch.toggleBossMode",
+					"when": "view == stockWatchTreeView && stockWatch.bossMode",
+					"group": "navigation@4"
+				},
+				{
+					"command": "stockWatch.openSettings",
+					"when": "view == stockWatchTreeView",
+					"group": "navigation@5"
+				}
+			],
+			"view/item/context": [
+				{
+					"command": "stockWatch.showDetailPanel",
+					"when": "view == stockWatchTreeView && viewItem =~ /^stock/",
+					"group": "navigation@1"
+				},
+				{
+					"command": "stockWatch.openDetail",
+					"when": "view == stockWatchTreeView && viewItem =~ /^stock/",
+					"group": "navigation@2"
+				},
+				{
+					"command": "stockWatch.pinToStatusBar",
+					"when": "view == stockWatchTreeView && viewItem == stock",
+					"group": "navigation@3"
+				},
+				{
+					"command": "stockWatch.unpinFromStatusBar",
+					"when": "view == stockWatchTreeView && viewItem == stock_pinned",
+					"group": "navigation@3"
+				},
+				{
+					"command": "stockWatch.showPanel",
+					"when": "view == stockWatchTreeView && viewItem =~ /^stock/",
+					"group": "navigation@4"
+				},
+				{
+					"command": "stockWatch.removeStock",
+					"when": "view == stockWatchTreeView && viewItem =~ /^stock/",
+					"group": "2_modify@1"
+				}
+			]
+		},
+		"keybindings": [
+			{
+				"command": "stockWatch.addStock",
+				"key": "alt+s"
+			},
+			{
+				"command": "stockWatch.showPanel",
+				"key": "alt+q"
+			},
+			{
+				"command": "stockWatch.toggleBossMode",
+				"key": "ctrl+alt+l"
+			}
+		],
+		"configuration": {
+			"title": "Stock Watch",
+			"properties": {
+				"stockWatch.refreshInterval": {
+					"type": "number",
+					"default": 5,
+					"minimum": 2,
+					"maximum": 3600,
+					"description": "行情自动刷新间隔（秒）"
+				},
+				"stockWatch.showStatusBar": {
+					"type": "boolean",
+					"default": true,
+					"description": "在状态栏显示行情"
+				},
+				"stockWatch.showEntryTag": {
+					"type": "boolean",
+					"default": false,
+					"description": "状态栏显示「自选股」入口标签（无置顶股时；关闭则只用 Alt+Q 呼出面板）"
+				},
+				"stockWatch.statusBarMode": {
+					"type": "string",
+					"enum": [
+						"single",
+						"rotate"
+					],
+					"default": "single",
+					"enumDescriptions": [
+						"固定显示置顶的一只（无置顶则显示第一只）",
+						"轮播全部自选股"
+					],
+					"description": "状态栏显示模式"
+				},
+				"stockWatch.rotateInterval": {
+					"type": "number",
+					"default": 5,
+					"minimum": 1,
+					"maximum": 3600,
+					"description": "状态栏轮播间隔（秒）"
+				},
+				"stockWatch.statusBarAlignment": {
+					"type": "string",
+					"enum": [
+						"left",
+						"right"
+					],
+					"default": "right",
+					"description": "状态栏对齐方式"
+				},
+				"stockWatch.indexCodes": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					},
+					"default": [
+						"1.000001",
+						"0.399001",
+						"0.399006"
+					],
+					"description": "指数列表（secid 格式：市场.代码，如 1.000001 上证指数）"
+				},
+				"stockWatch.defaultStocks": {
+					"type": "array",
+					"items": {
+						"type": "string"
+					},
+					"default": [
+						"600519",
+						"000001",
+						"300750"
+					],
+					"description": "首次安装时的默认自选股（6位代码，沪深自动识别）"
+				},
+				"stockWatch.offHoursRefresh": {
+					"type": "number",
+					"default": 60,
+					"minimum": 5,
+					"maximum": 3600,
+					"description": "非交易时段降频刷新间隔（秒），0=不自动刷新"
+				}
+			}
+		}
+	},
+	"scripts": {
+		"vscode:prepublish": "npm run compile",
+		"compile": "tsc -p ./",
+		"watch": "tsc -watch -p ./"
+	},
+	"devDependencies": {
+		"@types/node": "20.x",
+		"@types/vscode": "^1.85.0",
+		"typescript": "^5.4.5"
+	},
+	"__metadata": {
+		"installedTimestamp": 1787644657528,
+		"targetPlatform": "undefined",
+		"size": 85204
+	}
+}
