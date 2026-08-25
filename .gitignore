@@ -2,3 +2,8 @@ node_modules/
 out/
 *.vsix
 .vscode/
+.tmpext/
+out_test/
+out_locked_bak/
+.old_075_bak/
+*.log
